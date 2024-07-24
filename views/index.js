@@ -5,6 +5,8 @@ const wikiPage = require("./wikipage");
 const editPage = require("./editpage");
 const listUsers = require("./userlist");
 const userPages = require("./userpages");
+const notFoundPage = require("./notfoundpage");
+const internalErrorPage = require("./internalerrorpage");
 
 module.exports = {
   layout,
@@ -14,4 +16,6 @@ module.exports = {
   editPage,
   listUsers,
   userPages,
+  notFoundPage,
+  internalErrorPage,
 };

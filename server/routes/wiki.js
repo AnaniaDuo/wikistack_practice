@@ -1,7 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const { main, addPage, wikiPage, editPage } = require("../../views");
+const {
+  main,
+  addPage,
+  wikiPage,
+  editPage,
+  notFoundPage,
+} = require("../../views");
 const { db, Page, User } = require("../../models");
+
+console.log("get to wiki----");
 
 router.get("/", async (req, res, next) => {
   try {
@@ -70,14 +78,12 @@ router.get("/:slug/edit", async (req, res, next) => {
       where: {
         slug: req.params.slug,
       },
+      include: { model: User, as: "author" },
     });
-    console.log("get the page");
     if (page === null) {
-      res.sendStatus(404);
+      res.send(notFoundPage());
     } else {
-      console.log("get to else");
-      const user = await page.getAuthor();
-      res.send(editPage(page, user));
+      res.send(editPage(page, page.author));
     }
   } catch (err) {
     next(err);
@@ -98,16 +104,16 @@ router.get("/:slug", async (req, res, next) => {
       where: {
         slug: req.params.slug,
       },
+      include: { model: User, as: "author" },
     });
     if (page === null) {
-      res.sendStatus(404);
+      res.send(notFoundPage());
     } else {
-      const author = await page.getAuthor();
-      res.send(wikiPage(page, author));
+      console.log("what is page in get slug", page);
+      res.send(wikiPage(page, page.author));
     }
   } catch (err) {
     next(err);
   }
 });
-
 module.exports = router;

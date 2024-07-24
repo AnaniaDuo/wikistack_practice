@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const morgan = require("morgan");
 const path = require("path");
+const { notFoundPage, internalErrorPage } = require("../views");
 
 app.use(morgan("dev")); //logging middleware
 app.use(express.static(path.join(__dirname, "..", "/public"))); //serving up static file
@@ -16,17 +17,22 @@ app.get("/", (req, res) => {
   res.redirect("/wiki/");
 });
 
-// any remaining request with an extension (.js, .css, etc.) send 404
-app.use((err, req, res, next) => {
-  console.log("what is error", err);
-  if (path.extname(req.path).length) {
-    const err = new Error("Not found");
-    err.status = 404;
-    next(err);
-  } else {
-    next();
-  }
+// 404 error handling
+app.use((req, res, next) => {
+  res.status(404).send(notFoundPage());
 });
+
+// // any remaining request with an extension (.js, .css, etc.) send 404
+// app.use((err, req, res, next) => {
+//   console.log("what is error", err);
+//   if (path.extname(req.path).length) {
+//     const err = new Error("Not found");
+//     err.status = 404;
+//     next(err);
+//   } else {
+//     next();
+//   }
+// });
 
 // sends index.html
 app.use("*", (req, res) => {
@@ -35,12 +41,9 @@ app.use("*", (req, res) => {
 
 // error handling endware
 app.use((err, req, res, next) => {
-  console.log("Error is", err);
-  // console.error(err);
-  // console.error(err.stack);
-  // res.status(
-  //   err.status(err?.status || 500).send(err?.message || "Internal Server")
-  // );
+  console.log("Error at handling endware is", err);
+  console.error(err.stack);
+  res.status(500).send(internalErrorPage(err));
 });
 
 module.exports = app;

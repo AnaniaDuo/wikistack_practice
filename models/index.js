@@ -43,8 +43,9 @@ const User = db.define("user", {
   },
 });
 
-// table association
+// table association - one to many page -> user/author
 Page.belongsTo(User, { as: "author" });
+User.hasMany(Page, { foreignKey: "authorId" });
 
 module.exports = {
   db,

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { User, Page } = require("../../models");
-const { listUsers, userPages } = require("../../views");
+const { listUsers, userPages, notFoundPage } = require("../../views");
 
 // GET /users
 router.get("/", async (req, res, next) => {
@@ -17,15 +17,17 @@ router.get("/", async (req, res, next) => {
 // GET /user
 router.get("/:userId", async (req, res, next) => {
   try {
-    const user = await User.findByPk(req.params.userId);
-    console.log("what is user", user);
-    const pages = await Page.findAll({
-      where: {
-        authorId: req.params.userId,
-      },
+    // use eager loading to avoid 2 SQL queries
+    const user = await User.findByPk(req.params.userId, {
+      include: [{ model: Page }],
     });
-    console.log("what is pages", pages);
-    res.send(userPages(user, pages));
+
+    if (!user) {
+      console.log("there is no user", user);
+      res.send(notFoundPage());
+    } else {
+      res.send(userPages(user, user.pages));
+    }
   } catch (err) {
     next(err);
   }
